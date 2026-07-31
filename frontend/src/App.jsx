@@ -3,10 +3,12 @@ import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import CakeGrid from './components/CakeGrid';
 import Checkout from './pages/Checkout';
+import AuthModal from './components/AuthModal'; // <-- Ye import missing tha
 import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -14,7 +16,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen font-sans text-amber-50 antialiased selection:bg-amber-900/50">
-      <Navbar onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar 
+        onOpenCart={() => setIsCartOpen(true)} 
+        onOpenAuth={() => setIsAuthOpen(true)} 
+      />
+
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
+      />
       
       <CartDrawer
         isOpen={isCartOpen}
@@ -29,11 +39,11 @@ export default function App() {
           {/* Dark Chocolate Hero Section */}
           <section className="relative overflow-hidden pt-10 pb-16 md:py-20">
             
-            {/* Glowing Warm Ambient Light Blobs */}
+            {/* Glowing Ambient Light */}
             <div className="absolute top-10 left-1/4 w-80 h-80 bg-amber-600/20 rounded-full blur-3xl pointer-events-none animate-glow" />
             <div className="absolute top-20 right-1/4 w-96 h-96 bg-rose-600/15 rounded-full blur-3xl pointer-events-none animate-glow" />
 
-            {/* Floating 3D Element Decorations */}
+            {/* Floating 3D Elements */}
             <div className="hidden lg:block absolute top-16 left-12 text-6xl animate-float pointer-events-none drop-shadow-2xl select-none opacity-80">
               🧁
             </div>
@@ -49,16 +59,14 @@ export default function App() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
               
-              {/* Glassmorphic Dark Hero Container */}
+              {/* Glass Hero Container */}
               <div className="max-w-4xl mx-auto px-6 py-10 bg-[#2A1711]/60 backdrop-blur-xl rounded-3xl border border-amber-900/40 shadow-2xl relative z-10 text-center mb-12">
                 
-                {/* Gold Glass Pill Badge */}
                 <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-500/30 text-amber-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-md mb-6">
                   <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
                   <span>100% Handcrafted • Pure Butter & Belgian Cocoa</span>
                 </div>
 
-                {/* Main Gold-Glow Headline */}
                 <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-amber-50 font-serif mb-6 tracking-tight leading-[1.15] drop-shadow-lg">
                   Freshly Baked Happiness, <br />
                   <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 bg-clip-text text-transparent">
@@ -110,7 +118,7 @@ export default function App() {
             </div>
           </section>
 
-          {/* Interactive Category Filter Pills */}
+          {/* Interactive Category Filters */}
           <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
             <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
               {categories.map((cat) => (
@@ -129,7 +137,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Cake Cards Catalog */}
           <CakeGrid selectedCategory={selectedCategory} />
         </>
       )}
