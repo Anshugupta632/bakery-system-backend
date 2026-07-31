@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import CakeGrid from './components/CakeGrid';
 import Checkout from './pages/Checkout';
-import { Sparkles, HeartHandshake, ShieldCheck, Truck } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -13,7 +13,7 @@ export default function App() {
   const categories = ['All', 'Chocolate', 'Fruit & Fresh', 'Bestseller', 'Eggless', 'Customized'];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] font-sans text-stone-800 antialiased selection:bg-amber-200">
+    <div className="min-h-screen font-sans text-amber-50 antialiased selection:bg-amber-900/50">
       <Navbar onOpenCart={() => setIsCartOpen(true)} />
       
       <CartDrawer
@@ -26,61 +26,84 @@ export default function App() {
         <Checkout onBack={() => setCurrentView('home')} />
       ) : (
         <>
-          {/* Premium Hero Section */}
-          <section className="relative overflow-hidden pt-12 pb-16 md:py-20 bg-gradient-to-b from-amber-100/60 via-amber-50/30 to-[#FAF7F2]">
-            {/* Background Aesthetic Blur Blobs */}
-            <div className="absolute top-0 -left-12 w-72 h-72 bg-amber-300/30 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute top-10 right-0 w-96 h-96 bg-rose-200/30 rounded-full blur-3xl pointer-events-none" />
+          {/* Dark Chocolate Hero Section */}
+          <section className="relative overflow-hidden pt-10 pb-16 md:py-20">
+            
+            {/* Glowing Warm Ambient Light Blobs */}
+            <div className="absolute top-10 left-1/4 w-80 h-80 bg-amber-600/20 rounded-full blur-3xl pointer-events-none animate-glow" />
+            <div className="absolute top-20 right-1/4 w-96 h-96 bg-rose-600/15 rounded-full blur-3xl pointer-events-none animate-glow" />
+
+            {/* Floating 3D Element Decorations */}
+            <div className="hidden lg:block absolute top-16 left-12 text-6xl animate-float pointer-events-none drop-shadow-2xl select-none opacity-80">
+              🧁
+            </div>
+            <div className="hidden lg:block absolute bottom-12 left-24 text-5xl animate-float-slow pointer-events-none drop-shadow-2xl select-none opacity-80">
+              🍓
+            </div>
+            <div className="hidden lg:block absolute top-20 right-16 text-6xl animate-float-slow pointer-events-none drop-shadow-2xl select-none opacity-80">
+              🎂
+            </div>
+            <div className="hidden lg:block absolute bottom-16 right-28 text-5xl animate-float pointer-events-none drop-shadow-2xl select-none opacity-80">
+              🍫
+            </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
               
-              {/* Glassmorphism Pill */}
-              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md border border-amber-200/80 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold text-amber-900 shadow-xs mb-6">
-                <Sparkles className="w-4 h-4 text-amber-600 animate-pulse" />
-                <span>Crafted Fresh Daily • 100% Eggless Options</span>
+              {/* Glassmorphic Dark Hero Container */}
+              <div className="max-w-4xl mx-auto px-6 py-10 bg-[#2A1711]/60 backdrop-blur-xl rounded-3xl border border-amber-900/40 shadow-2xl relative z-10 text-center mb-12">
+                
+                {/* Gold Glass Pill Badge */}
+                <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-500/30 text-amber-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-md mb-6">
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                  <span>100% Handcrafted • Pure Butter & Belgian Cocoa</span>
+                </div>
+
+                {/* Main Gold-Glow Headline */}
+                <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-amber-50 font-serif mb-6 tracking-tight leading-[1.15] drop-shadow-lg">
+                  Freshly Baked Happiness, <br />
+                  <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 bg-clip-text text-transparent">
+                    Customized For Every Moment
+                  </span> 🍰
+                </h1>
+
+                <p className="text-amber-200/80 font-medium max-w-2xl mx-auto text-base sm:text-lg mb-8 leading-relaxed">
+                  Choose your favorite flavor, write a personalized topping message, and select express delivery slots.
+                </p>
+
+                <div className="flex justify-center gap-4">
+                  <a
+                    href="#menu"
+                    className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-amber-500/20 hover:-translate-y-0.5 transition duration-200 cursor-pointer text-sm"
+                  >
+                    Explore Cake Menu
+                  </a>
+                </div>
               </div>
 
-              {/* Main Headline */}
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-[#2C1810] font-serif mb-6 tracking-tight leading-[1.15]">
-                Freshly Baked Happiness, <br />
-                <span className="bg-gradient-to-r from-amber-700 via-amber-800 to-rose-700 bg-clip-text text-transparent">
-                  Delivered To Your Door
-                </span> 🍰
-              </h1>
-
-              <p className="text-stone-600 max-w-2xl mx-auto text-base sm:text-xl font-normal mb-8 leading-relaxed">
-                Artisanal cakes prepared with pure butter, rich Belgian chocolate, and zero preservatives. Perfect for birthdays, anniversaries, & sweet cravings.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
-                <a
-                  href="#menu"
-                  className="w-full sm:w-auto bg-[#3E2723] hover:bg-[#2C1810] text-amber-50 font-bold px-8 py-3.5 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition duration-200 text-center cursor-pointer"
-                >
-                  Explore Delicious Menu
-                </a>
-                <a
-                  href="#trust"
-                  className="w-full sm:w-auto bg-white/90 hover:bg-white text-stone-800 border border-stone-200 font-bold px-8 py-3.5 rounded-2xl shadow-xs hover:shadow-md transition duration-200 text-center"
-                >
-                  Custom Cake Orders
-                </a>
-              </div>
-
-              {/* Trust Badges Bar */}
-              <div id="trust" className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto border-t border-amber-200/60 pt-8 text-stone-700">
-                <div className="flex items-center justify-center gap-2.5 text-xs font-semibold text-amber-950">
-                  <Truck className="w-4 h-4 text-amber-700" />
-                  <span>Express Same-Day Slot Delivery</span>
+              {/* Glass Feature Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <div className="bg-[#2A1711]/50 backdrop-blur-xl p-5 rounded-3xl border border-amber-900/30 shadow-lg hover:border-amber-500/40 hover:-translate-y-1 transition duration-300 text-left">
+                  <div className="w-10 h-10 bg-amber-900/40 rounded-2xl flex items-center justify-center text-xl mb-3 border border-amber-700/30">
+                    ⚡
+                  </div>
+                  <h4 className="font-bold text-amber-100 text-sm">Same-Day Express</h4>
+                  <p className="text-xs text-amber-200/60 mt-1">Order before 4 PM for evening delivery slots.</p>
                 </div>
-                <div className="flex items-center justify-center gap-2.5 text-xs font-semibold text-amber-950">
-                  <ShieldCheck className="w-4 h-4 text-amber-700" />
-                  <span>Safe & Hygienic Packaging</span>
+
+                <div className="bg-[#2A1711]/50 backdrop-blur-xl p-5 rounded-3xl border border-amber-900/30 shadow-lg hover:border-amber-500/40 hover:-translate-y-1 transition duration-300 text-left">
+                  <div className="w-10 h-10 bg-amber-900/40 rounded-2xl flex items-center justify-center text-xl mb-3 border border-amber-700/30">
+                    🌱
+                  </div>
+                  <h4 className="font-bold text-amber-100 text-sm">100% Eggless Option</h4>
+                  <p className="text-xs text-amber-200/60 mt-1">Sponge cakes prepared without compromise on taste.</p>
                 </div>
-                <div className="flex items-center justify-center gap-2.5 text-xs font-semibold text-amber-950">
-                  <HeartHandshake className="w-4 h-4 text-amber-700" />
-                  <span>100% Satisfaction Guarantee</span>
+
+                <div className="bg-[#2A1711]/50 backdrop-blur-xl p-5 rounded-3xl border border-amber-900/30 shadow-lg hover:border-amber-500/40 hover:-translate-y-1 transition duration-300 text-left">
+                  <div className="w-10 h-10 bg-amber-900/40 rounded-2xl flex items-center justify-center text-xl mb-3 border border-amber-700/30">
+                    ✍️
+                  </div>
+                  <h4 className="font-bold text-amber-100 text-sm">Custom Topping Text</h4>
+                  <p className="text-xs text-amber-200/60 mt-1">Get custom names or birthday greetings iced on cake.</p>
                 </div>
               </div>
 
@@ -88,19 +111,19 @@ export default function App() {
           </section>
 
           {/* Interactive Category Filter Pills */}
-          <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
+          <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
+            <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer ${
+                  className={`px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition duration-200 whitespace-nowrap cursor-pointer shadow-sm ${
                     selectedCategory === cat
-                      ? 'bg-[#3E2723] text-amber-50 shadow-md scale-105'
-                      : 'bg-white border border-stone-200 text-stone-600 hover:bg-amber-50 hover:text-amber-900'
+                      ? 'bg-amber-400 text-stone-950 font-black shadow-lg scale-105'
+                      : 'bg-[#2A1711]/80 backdrop-blur-md border border-amber-900/40 text-amber-200/80 hover:bg-amber-900/30 hover:text-amber-100'
                   }`}
                 >
-                  {cat}
+                  {cat === 'All' ? '✨ All Cakes' : cat}
                 </button>
               ))}
             </div>
