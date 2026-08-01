@@ -1,90 +1,88 @@
-import { X, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { X, Trash2, ShoppingBag } from 'lucide-react';
 
-export default function CartDrawer({ isOpen, onClose, onProceedToCheckout }) {
-  const { cart, removeFromCart, cartTotal, clearCart } = useCart();
+export default function CartDrawer({ isOpen, onClose, onCheckout }) {
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-      />
-
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
-          
-          {/* Header */}
-          <div className="p-4 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-amber-900">Your Cake Cart 🎂</h2>
-            <button onClick={onClose} className="p-1 text-gray-500 hover:text-black">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-xs">
+      <div className="w-full max-w-md bg-[#1A0C08] border-l border-amber-900/50 h-full shadow-2xl flex flex-col justify-between p-5">
+        
+        {/* Header */}
+        <div>
+          <div className="flex justify-between items-center pb-4 border-b border-amber-900/40">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-bold text-amber-100 font-serif">Your Baking Cart</h2>
+            </div>
+            <button onClick={onClose} className="text-amber-400 hover:text-amber-200 p-1">
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {cart.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p className="text-4xl mb-2">🧁</p>
-                <p className="font-medium">Your cart is empty!</p>
-                <p className="text-xs text-gray-400 mt-1">Add some delicious cakes to get started.</p>
+          <div className="my-4 max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+            {cartItems.length === 0 ? (
+              <div className="text-center py-12 text-amber-200/50">
+                <p className="text-sm font-semibold">Your cart is empty 🎂</p>
+                <p className="text-xs mt-1 text-amber-800">Add cakes with custom names from the menu.</p>
               </div>
             ) : (
-              cart.map((item, index) => (
-                <div
-                  key={`${item.cake_id}-${item.size_id}-${index}`}
-                  className="flex items-center space-x-4 border border-gray-100 p-3 rounded-xl bg-amber-50/30"
-                >
-                  <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150'}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
+              cartItems.map((item) => (
+                <div key={item.id} className="bg-[#26130C] border border-amber-900/40 p-3 rounded-2xl flex gap-3 items-center">
+                  <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover border border-amber-900/30" />
+                  
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-gray-900 text-sm truncate">{item.name}</h4>
-                    <p className="text-xs text-amber-800 font-medium">Size: {item.size_label}</p>
-                    {item.customization_text && (
-                      <p className="text-xs text-gray-500 italic truncate">"{item.customization_text}"</p>
+                    <h4 className="text-xs font-bold text-amber-100 truncate">{item.name}</h4>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-semibold uppercase">
+                      {item.selectedSize}
+                    </span>
+
+                    {/* ICED NAME ON CAKE DISPLAY IN CART */}
+                    {item.customText && (
+                      <p className="text-[10px] text-amber-300 italic mt-1 font-serif truncate">
+                        Writing: "{item.customText}"
+                      </p>
                     )}
-                    <p className="text-sm font-semibold text-amber-900 mt-1">
-                      ₹{item.item_price} × {item.quantity}
-                    </p>
+
+                    <p className="text-xs font-extrabold text-amber-400 mt-1">₹{item.price}</p>
                   </div>
-                  <button
-                    onClick={() => removeFromCart(item.cake_id, item.size_id)}
-                    className="text-gray-400 hover:text-rose-600 p-1 transition"
-                  >
+
+                  {/* Quantity Actions */}
+                  <div className="flex items-center gap-2 bg-[#120805] px-2 py-1 rounded-xl border border-amber-900/40">
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="text-amber-200 font-bold text-xs px-1">-</button>
+                    <span className="text-xs font-bold text-amber-100">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="text-amber-200 font-bold text-xs px-1">+</button>
+                  </div>
+
+                  <button onClick={() => removeFromCart(item.id)} className="text-rose-400 hover:text-rose-300 p-1">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))
             )}
           </div>
-
-          {/* Footer Subtotal */}
-          {cart.length > 0 && (
-            <div className="p-4 bg-amber-50/50 border-t border-amber-100 space-y-3">
-              <div className="flex justify-between items-center text-amber-900 font-semibold">
-                <span>Subtotal</span>
-                <span className="text-lg font-bold">₹{cartTotal}</span>
-              </div>
-              <button
-                onClick={() => {
-                  onClose();
-                  onProceedToCheckout();
-                }}
-                className="w-full bg-amber-800 hover:bg-amber-900 text-white py-3 rounded-xl font-bold flex items-center justify-center space-x-2 shadow-lg transition"
-              >
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Footer Checkout */}
+        {cartItems.length > 0 && (
+          <div className="pt-4 border-t border-amber-900/40">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-xs text-amber-200/70 font-semibold uppercase">Total Amount</span>
+              <span className="text-2xl font-black text-amber-400">₹{cartTotal}</span>
+            </div>
+
+            <button
+              onClick={onCheckout}
+              className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black rounded-2xl shadow-xl transition cursor-pointer text-sm"
+            >
+              Proceed to Checkout 🚀
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
