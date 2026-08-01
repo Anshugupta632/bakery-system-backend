@@ -24,7 +24,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
     try {
       if (isSignUp) {
-        // Register API Call
         const res = await API.post('/auth/register', {
           email: formData.email,
           password: formData.password,
@@ -32,41 +31,38 @@ export default function AuthModal({ isOpen, onClose }) {
         });
 
         if (res.data.success) {
-          // Auto login after signup
+          alert('Account created successfully! Logging you in...');
           await login(formData.email, formData.password);
           onClose();
         }
       } else {
-        // Login API Call
         const result = await login(formData.email, formData.password);
-        if (result.success) {
+        if (result?.success) {
           onClose();
         } else {
-          setError(result.message || 'Invalid email or password');
+          setError(result?.message || 'Invalid email or password');
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Try again!');
+      setError(err.response?.data?.message || 'Registration failed. Please check backend auth endpoint.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-md bg-[#22120C] border border-amber-900/50 rounded-3xl p-6 sm:p-8 shadow-2xl text-amber-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+      <div className="relative w-full max-w-md bg-[#22120C] border border-amber-900/60 rounded-3xl p-6 sm:p-8 shadow-2xl text-amber-50">
         
-        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-amber-200/60 hover:text-amber-100 p-1"
+          className="absolute top-4 right-4 text-amber-200/60 hover:text-amber-100 p-1 cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-400 px-3 py-1 rounded-full text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>CakeBakers Account</span>
           </div>
@@ -74,17 +70,16 @@ export default function AuthModal({ isOpen, onClose }) {
             {isSignUp ? 'Create Your Account 🍰' : 'Welcome Back 🧁'}
           </h2>
           <p className="text-xs text-amber-200/60 mt-1">
-            {isSignUp ? 'Sign up to track orders & earn sweet rewards' : 'Login to manage your cake orders'}
+            {isSignUp ? 'Sign up to place and track cake orders' : 'Login to access your orders'}
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs text-center font-medium">
+          <div className="mb-4 p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl text-rose-200 text-xs text-center font-semibold">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
             <div>
@@ -142,7 +137,6 @@ export default function AuthModal({ isOpen, onClose }) {
           </button>
         </form>
 
-        {/* Toggle Mode */}
         <div className="mt-6 text-center text-xs text-amber-200/60">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button

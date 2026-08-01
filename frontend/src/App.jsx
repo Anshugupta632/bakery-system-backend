@@ -3,19 +3,32 @@ import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import CakeGrid from './components/CakeGrid';
 import Checkout from './pages/Checkout';
-import AuthModal from './components/AuthModal'; // <-- Ye import missing tha
+import AdminDashboard from './pages/AdminDashboard';
+import AuthModal from './components/AuthModal';
 import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('home');
+  const [currentView, setCurrentView] = useState('home'); // 'home' | 'checkout' | 'admin'
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const categories = ['All', 'Chocolate', 'Fruit & Fresh', 'Bestseller', 'Eggless', 'Customized'];
 
   return (
     <div className="min-h-screen font-sans text-amber-50 antialiased selection:bg-amber-900/50">
+      
+      {/* Top Admin Switcher Bar */}
+      <div className="bg-[#120805] border-b border-amber-900/40 px-4 py-1.5 text-xs text-amber-200/70 flex justify-between items-center max-w-7xl mx-auto">
+        <span className="font-semibold">✨ CakeBakers Management Terminal</span>
+        <button
+          onClick={() => setCurrentView(currentView === 'admin' ? 'home' : 'admin')}
+          className="text-amber-400 hover:text-amber-300 font-bold cursor-pointer transition"
+        >
+          {currentView === 'admin' ? '← Back to Store' : 'Go to Admin Dashboard 🛠️'}
+        </button>
+      </div>
+
       <Navbar 
         onOpenCart={() => setIsCartOpen(true)} 
         onOpenAuth={() => setIsAuthOpen(true)} 
@@ -29,10 +42,15 @@ export default function App() {
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        onProceedToCheckout={() => setCurrentView('checkout')}
+        onProceedToCheckout={() => {
+          setIsCartOpen(false);
+          setCurrentView('checkout');
+        }}
       />
 
-      {currentView === 'checkout' ? (
+      {currentView === 'admin' ? (
+        <AdminDashboard onBack={() => setCurrentView('home')} />
+      ) : currentView === 'checkout' ? (
         <Checkout onBack={() => setCurrentView('home')} />
       ) : (
         <>
