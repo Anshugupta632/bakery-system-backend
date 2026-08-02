@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import CakeGrid from './components/CakeGrid';
 import CustomizedShowcase from './components/CustomizedShowcase';
@@ -8,7 +8,6 @@ import CartDrawer from './components/CartDrawer';
 import AuthModal from './components/AuthModal';
 import AdminDashboardModal from './components/AdminDashboardModal';
 import { CartProvider } from './context/CartContext';
-import { cakesData } from './data/cakesData';
 import { Search, ArrowUpDown } from 'lucide-react';
 
 export default function App() {
@@ -18,6 +17,24 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('default'); // 'default', 'lowToHigh', 'highToLow'
+
+  const [cakesData, setCakesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/cakes')
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success) {
+          setCakesData(result.data);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch cakes:', err);
+        setLoading(false);
+      });
+  }, []);
 
   // Categories matching cakesData.js
   const categories = ['All', 'Chocolate', 'Classics', 'Fruit Cakes', 'Indian Fusion', 'Premium'];
@@ -111,7 +128,11 @@ export default function App() {
 
         {/* Main Specialty Cake Menu */}
         <main>
-          <CakeGrid selectedCategory="All" cakes={processedCakes} />
+          {loading ? (
+            <div className="text-center py-20 text-amber-200/60">Loading cakes... 🎂</div>
+          ) : (
+            <CakeGrid selectedCategory="All" cakes={processedCakes} />
+          )}
         </main>
 
         {/* 🎨 Customized Photo & Theme Showcase Section */}

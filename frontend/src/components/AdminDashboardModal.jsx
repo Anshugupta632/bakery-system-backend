@@ -1,46 +1,124 @@
-import React, { useState } from 'react';
-import { X, Lock, CheckCircle2, AlertCircle, Plus, Edit2, ShieldAlert, DollarSign, Package } from 'lucide-react';
-import { cakesData as initialCakesData } from '../data/cakesData';
+import React, { useState, useEffect } from 'react';
+import { X, Lock, CheckCircle2, AlertCircle, Edit2, ShieldAlert, Package } from 'lucide-react';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function AdminDashboardModal({ isOpen, onClose }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [adminKey, setAdminKey] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [cakes, setCakes] = useState(initialCakesData);
-  const [activeTab, setActiveTab] = useState('menu'); // 'menu' | 'orders'
+  const [cakes, setCakes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Edit Price State
   const [editingCakeId, setEditingCakeId] = useState(null);
   const [newPrice, setNewPrice] = useState('');
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchCakes();
+    }
+  }, [isOpen, isAuthenticated]);
 
-  // Simple Passcode check (Default: 1234 or cake2026)
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === 'cake2026' || password === '1234') {
-      setIsAuthenticated(true);
-      setErrorMsg('');
-    } else {
-      setErrorMsg('Incorrect Admin Pin! (Try: 1234)');
+  const fetchCakes = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/cakes`, {
+        headers: { 'x-admin-key': adminKey },
+      });
+      const result = await res.json();
+
+      if (!result.success) {
+        setErrorMsg(result.message || 'Failed to load cakes');
+        setIsAuthenticated(false);
+        return;
+      }
+
+      setCakes(result.data);
+    } catch (err) {
+      console.error('Failed to fetch cakes:', err);
+      setErrorMsg('Could not reach server');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Toggle Stock Status
-  const toggleStock = (id) => {
-    setCakes((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, isOutOfStock: !c.isOutOfStock } : c))
-    );
+  if (!isOpen) return null;
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    // Try fetching cakes with the entered key — if it works, key is valid
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/cakes`, {
+        headers: { 'x-admin-key': adminKey },
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        setIsAuthenticated(true);
+        setCakes(result.data);
+      } else {
+        setErrorMsg('Incorrect Admin Key');
+      }
+    } catch (err) {
+      setErrorMsg('Could not reach server');
+    }
   };
 
-  // Save New Price
-  const savePrice = (id) => {
-    if (!newPrice || isNaN(newPrice)) return;
+  const toggleStock = async (id) => {
+    const targetCake = cakes.find((c) => c.id === id);
+    if (!targetCake) return;
+
+    const newStockStatus = !targetCake.isOutOfStock;
+
+    // UI update immediately
     setCakes((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, priceHalfKg: Number(newPrice) } : c))
+      prev.map((c) => (c.id === id ? { ...c, isOutOfStock: newStockStatus } : c))
     );
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/cakes/${id}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+        },
+        body: JSON.stringify({ isAvailable: !newStockStatus }),
+      });
+      const result = await res.json();
+      if (!result.success) console.error('Stock update failed:', result.message);
+    } catch (err) {
+      console.error('Failed to sync stock:', err);
+    }
+  };
+
+  const savePrice = async (id) => {
+    if (!newPrice || isNaN(newPrice)) return;
+    const priceNumber = Number(newPrice);
+
+    setCakes((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, priceHalfKg: priceNumber } : c))
+    );
+
     setEditingCakeId(null);
     setNewPrice('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/cakes/${id}/price`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+        },
+        body: JSON.stringify({ price: priceNumber }),
+      });
+      const result = await res.json();
+      if (!result.success) console.error('Price update failed:', result.message);
+    } catch (err) {
+      console.error('Failed to sync price:', err);
+    }
   };
 
   return (
@@ -58,7 +136,7 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
           <button
             onClick={() => {
               setIsAuthenticated(false);
-              setPassword('');
+              setAdminKey('');
               onClose();
             }}
             className="p-1.5 rounded-xl hover:bg-amber-900/30 text-amber-400 cursor-pointer"
@@ -69,20 +147,19 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
 
         {/* Content Body */}
         {!isAuthenticated ? (
-          /* Admin Login Screen */
           <div className="p-8 sm:p-12 text-center max-w-sm mx-auto my-auto w-full">
             <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400 mx-auto mb-4">
               <Lock className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-bold text-amber-100 mb-1">Admin Access Only</h3>
-            <p className="text-xs text-amber-200/60 mb-6">Enter owner passcode to manage cakes & prices.</p>
+            <p className="text-xs text-amber-200/60 mb-6">Enter owner admin key to manage cakes & prices.</p>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <input
                 type="password"
-                placeholder="Enter Passcode (Default: 1234)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter Admin Key"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
                 className="w-full bg-[#120805] border border-amber-900/50 rounded-xl px-4 py-3 text-xs text-center font-mono tracking-widest text-amber-100 focus:outline-none focus:border-amber-500/60"
               />
               {errorMsg && <p className="text-[11px] text-red-400 font-semibold">{errorMsg}</p>}
@@ -95,7 +172,6 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
             </form>
           </div>
         ) : (
-          /* Dashboard Main Panel */
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             
             {/* Quick Metrics Bar */}
@@ -137,9 +213,12 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
 
             {/* Menu Items Table */}
             <div className="bg-[#22120C] border border-amber-900/40 rounded-2xl p-4 overflow-x-auto">
-              <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-4">
-                Manage Menu Prices & Stock
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  Manage Menu Prices & Stock
+                </h3>
+                {isLoading && <span className="text-[10px] text-amber-400 animate-pulse">Syncing Database...</span>}
+              </div>
 
               <table className="w-full text-left text-xs">
                 <thead>
@@ -160,7 +239,6 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
                       </td>
                       <td className="py-2.5 px-3 text-amber-200/70">{cake.category || 'General'}</td>
                       
-                      {/* Price Column / Edit Mode */}
                       <td className="py-2.5 px-3 font-bold text-amber-300">
                         {editingCakeId === cake.id ? (
                           <div className="flex items-center gap-1">
@@ -173,7 +251,7 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
                             />
                             <button
                               onClick={() => savePrice(cake.id)}
-                              className="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-bold"
+                              className="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-bold cursor-pointer"
                             >
                               Save
                             </button>
@@ -186,7 +264,7 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
                                 setEditingCakeId(cake.id);
                                 setNewPrice(cake.priceHalfKg);
                               }}
-                              className="text-amber-400/60 hover:text-amber-400"
+                              className="text-amber-400/60 hover:text-amber-400 cursor-pointer"
                             >
                               <Edit2 className="w-3 h-3" />
                             </button>
@@ -194,7 +272,6 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
                         )}
                       </td>
 
-                      {/* Stock Badge */}
                       <td className="py-2.5 px-3">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
@@ -207,7 +284,6 @@ export default function AdminDashboardModal({ isOpen, onClose }) {
                         </span>
                       </td>
 
-                      {/* Toggle Stock Action */}
                       <td className="py-2.5 px-3 text-right">
                         <button
                           onClick={() => toggleStock(cake.id)}

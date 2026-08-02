@@ -21,14 +21,20 @@ const AuthModal = ({ isOpen, onClose, setUser, setIsLoggedIn }) => {
     setErrorMsg('');
     setLoading(true);
 
-    const endpoint = isLoginTab ? '/api/auth/login' : '/api/auth/register';
+    const endpoint = isLoginTab ? '/api/auth/login' : '/api/auth/signup';
 
     try {
       const res = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       console.log('Auth Response:', res.data);
 
-      const token = res.data.token || res.data.accessToken || (res.data.data && res.data.data.token);
-      const user = res.data.user || (res.data.data && res.data.data.user) || {
+      if (!res.data.success) {
+        setErrorMsg(res.data.message || 'Authentication failed.');
+        setLoading(false);
+        return;
+      }
+
+      const token = res.data.session?.access_token || res.data.token;
+      const user = res.data.user || {
         name: formData.name || formData.email.split('@')[0],
         email: formData.email,
       };
@@ -36,8 +42,8 @@ const AuthModal = ({ isOpen, onClose, setUser, setIsLoggedIn }) => {
       if (token) {
         localStorage.setItem('token', token);
       }
-      localStorage.setItem('user', JSON.stringify(userData));
-      window.dispatchEvent(new Event('auth-change')); // Trigger event
+      localStorage.setItem('user', JSON.stringify(user));
+      window.dispatchEvent(new Event('auth-change'));
 
       if (setUser) setUser(user);
       if (setIsLoggedIn) setIsLoggedIn(true);
@@ -49,22 +55,6 @@ const AuthModal = ({ isOpen, onClose, setUser, setIsLoggedIn }) => {
     } catch (err) {
       console.error('Auth Error:', err);
       setLoading(false);
-
-      // Fallback for demo/offline: Save locally if backend is unreachable
-      if (!err.response) {
-        const mockUser = {
-          name: formData.name || formData.email.split('@')[0],
-          email: formData.email,
-        };
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        if (setUser) setUser(mockUser);
-        if (setIsLoggedIn) setIsLoggedIn(true);
-        alert(isLoginTab ? 'Logged in successfully!' : 'Account registered successfully!');
-        onClose();
-        window.location.reload();
-        return;
-      }
-
       setErrorMsg(err.response?.data?.message || 'Authentication failed. Please try again.');
     }
   };

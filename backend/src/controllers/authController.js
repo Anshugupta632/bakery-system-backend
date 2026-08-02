@@ -9,10 +9,11 @@ const signup = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email, password, name required' });
     }
 
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Create auth user using admin method (doesn't hijack the service client's session)
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
+      email_confirm: true, // auto-confirm, since backend is trusted
     });
 
     if (authError) throw authError;
