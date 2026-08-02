@@ -36,7 +36,8 @@ const AuthModal = ({ isOpen, onClose, setUser, setIsLoggedIn }) => {
       if (token) {
         localStorage.setItem('token', token);
       }
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(userData));
+      window.dispatchEvent(new Event('auth-change')); // Trigger event
 
       if (setUser) setUser(user);
       if (setIsLoggedIn) setIsLoggedIn(true);

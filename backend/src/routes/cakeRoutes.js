@@ -1,8 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { getAllCakes, getCakeById } = require('../controllers/cakeController');
+const cakesData = require('../data/cakesData');
 
-router.get('/', getAllCakes);
-router.get('/:id', getCakeById);
+// GET /api/cakes
+router.get('/', (req, res) => {
+  try {
+    res.json({ success: true, data: cakesData });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server Error fetching cakes' });
+  }
+});
 
 module.exports = router;

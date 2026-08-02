@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, User as UserIcon, LogOut, Cake } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, LogOut, UtensilsCrossed } from 'lucide-react';
 import AuthModal from './AuthModal';
+import { useCart } from '../context/CartContext'; // Cart Context import
 
-const Navbar = ({ cartCount = 0, onOpenCart }) => {
+const Navbar = ({ onOpenCart, onOpenAuth }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Sync Logged-In State from localStorage
-  useEffect(() => {
+  // Tera context se direct exact variables destructure kar rahe hain!
+  const { cartCount, cartItems } = useCart();
+
+  // Load user state & sync across app
+  const checkUserAuth = () => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
@@ -17,7 +21,23 @@ const Navbar = ({ cartCount = 0, onOpenCart }) => {
       } catch (e) {
         console.error('Failed to parse user from storage');
       }
+    } else {
+      setUser(null);
+      setIsLoggedIn(false);
     }
+  };
+
+  useEffect(() => {
+    checkUserAuth();
+
+    const handleAuthChange = () => checkUserAuth();
+    window.addEventListener('auth-change', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('auth-change', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -25,35 +45,47 @@ const Navbar = ({ cartCount = 0, onOpenCart }) => {
     localStorage.removeItem('token');
     setUser(null);
     setIsLoggedIn(false);
-    alert('Logged out successfully!');
-    window.location.reload();
+    window.dispatchEvent(new Event('auth-change'));
+  };
+
+  const handleOpenModal = () => {
+    if (onOpenAuth) {
+      onOpenAuth();
+    } else {
+      setIsAuthModalOpen(true);
+    }
   };
 
   return (
     <>
-      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md shadow-sm border-b border-pink-100">
+      <nav className="sticky top-0 z-40 bg-[#120805]/90 backdrop-blur-md border-b border-amber-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer">
-              <Cake className="w-8 h-8 text-pink-600" />
-              <span className="text-xl font-black tracking-tight text-gray-900">
-                Cake<span className="text-pink-600">Bakers</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <span className="text-xl font-black font-serif text-amber-100 tracking-tight">
+                Cake<span className="text-amber-400">Bakers</span>
               </span>
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               
-              {/* Cart Button */}
+              {/* Cart Button with EXERT EXACT cartCount Badge */}
               <button
                 onClick={onOpenCart}
-                className="relative p-2 text-gray-700 hover:text-pink-600 transition"
+                className="relative p-2.5 rounded-xl bg-[#22120C] border border-amber-900/40 text-amber-200 hover:text-amber-100 hover:border-amber-500/40 transition cursor-pointer flex items-center justify-center"
+                aria-label="Shopping Cart"
               >
-                <ShoppingBag className="w-6 h-6" />
+                <ShoppingBag className="w-5 h-5" />
+                
+                {/* Number tabhi dikhega jab cartCount > 0 ho */}
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-pink-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                  <span className="absolute -top-1.5 -right-1.5 bg-amber-500 text-stone-950 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#120805] animate-bounce shadow-md">
                     {cartCount}
                   </span>
                 )}
@@ -61,41 +93,46 @@ const Navbar = ({ cartCount = 0, onOpenCart }) => {
 
               {/* User Login / Profile Section */}
               {isLoggedIn && user ? (
-                <div className="flex items-center gap-3 bg-pink-50 px-3 py-1.5 rounded-full border border-pink-200">
-                  <div className="w-7 h-7 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                <div className="flex items-center gap-2.5 bg-[#22120C] px-3 py-1.5 rounded-2xl border border-amber-900/50">
+                  <div className="w-7 h-7 bg-amber-500 text-stone-950 rounded-xl flex items-center justify-center font-black text-xs uppercase shadow">
                     {user.name ? user.name.charAt(0) : 'U'}
                   </div>
-                  <span className="text-sm font-semibold text-gray-800 max-w-[100px] truncate">
+                  <span className="text-xs font-bold text-amber-100 max-w-[110px] truncate">
                     {user.name || user.email}
                   </span>
                   <button
                     onClick={handleLogout}
                     title="Logout"
-                    className="text-gray-500 hover:text-red-600 transition ml-1"
+                    className="p-1 text-amber-400/60 hover:text-red-400 transition ml-1 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
                 <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition duration-200"
+                  onClick={handleOpenModal}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition cursor-pointer shadow-md"
                 >
                   <UserIcon className="w-4 h-4" />
-                  Sign In
+                  <span>Login / Signup</span>
                 </button>
               )}
+
             </div>
 
           </div>
         </div>
       </nav>
 
-      {/* Auth Modal Trigger */}
+      {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        setUser={setUser}
+        setUser={(u) => {
+          setUser(u);
+          setIsLoggedIn(true);
+          window.dispatchEvent(new Event('auth-change'));
+        }}
         setIsLoggedIn={setIsLoggedIn}
       />
     </>
